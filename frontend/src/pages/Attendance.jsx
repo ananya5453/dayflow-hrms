@@ -1,355 +1,108 @@
-import { useEffect, useMemo, useState } from 'react'
-import Button from '../components/Button'
-import Card from '../components/Card'
-import Input from '../components/Input'
-
-const API_URL = 'http://127.0.0.1:5000'
-
-function calculateHours(checkIn, checkOut) {
-  if (!checkIn || !checkOut) {
-    return '—'
-  }
-
-  const start = new Date(checkIn)
-  const end = new Date(checkOut)
-
-  const totalMinutes = Math.max(
-    0,
-    Math.round((end - start) / 60000),
-  )
-
-  const hours = Math.floor(totalMinutes / 60)
-  const minutes = totalMinutes % 60
-
-  return `${hours}h ${String(minutes).padStart(2, '0')}m`
-}
-
-function formatTime(value) {
-  if (!value) {
-    return '—'
-  }
-
-  const date = new Date(value)
-
-  if (Number.isNaN(date.getTime())) {
-    return '—'
-  }
-
-  return date.toLocaleTimeString([], {
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: false,
-  })
-}
+import { useEffect, useState } from "react";
 
 function Attendance() {
-  const [employees, setEmployees] = useState([])
-  const [attendance, setAttendance] = useState({})
-  const [search, setSearch] = useState('')
-  const [selectedDate, setSelectedDate] = useState(
-    new Date().toISOString().split('T')[0],
-  )
-
-  const [loading, setLoading] = useState(true)
-  const [actionLoading, setActionLoading] = useState(null)
-  const [error, setError] = useState('')
-
-  // --------------------------------------------------
-  // LOAD EMPLOYEES
-  // --------------------------------------------------
-
-  const loadEmployees = async () => {
-    const token = localStorage.getItem('token')
-
-    if (!token) {
-      throw new Error('You are not logged in.')
-    }
-
-    const response = await fetch(
-      `${API_URL}/api/employees`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      },
-    )
-
-    const data = await response.json()
-
-    if (!response.ok) {
-      throw new Error(
-        data.error || 'Failed to load employees',
-      )
-    }
-
-    return Array.isArray(data) ? data : []
-  }
-
-  // --------------------------------------------------
-  // LOAD ATTENDANCE FOR EMPLOYEE
-  // --------------------------------------------------
-
-  const loadEmployeeAttendance = async (employee) => {
-    const token = localStorage.getItem('token')
-
-    if (!token) {
-      throw new Error('You are not logged in.')
-    }
-
-    const employeeId =
-      employee.id || employee.employee_id
-
-    const response = await fetch(
-      `${API_URL}/api/attendance/${employeeId}`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      },
-    )
-
-    const data = await response.json()
-
-    if (!response.ok) {
-      throw new Error(
-        data.error || 'Failed to load attendance',
-      )
-    }
-
-    return {
-      employeeId,
-      records: Array.isArray(data) ? data : [],
-    }
-  }
-
-  // --------------------------------------------------
-  // LOAD EVERYTHING
-  // --------------------------------------------------
-
-  const loadAttendance = async () => {
-    try {
-      setLoading(true)
-      setError('')
-
-      const employeeData = await loadEmployees()
-
-      setEmployees(employeeData)
-
-      const attendanceMap = {}
-
-      for (const employee of employeeData) {
-        try {
-          const result =
-            await loadEmployeeAttendance(employee)
-
-          attendanceMap[result.employeeId] =
-            result.records
-        } catch (err) {
-          console.error(
-            `Attendance error for employee ${employee.id}:`,
-            err,
-          )
-
-          attendanceMap[
-            employee.id || employee.employee_id
-          ] = []
-        }
-      }
-
-      setAttendance(attendanceMap)
-    } catch (err) {
-      console.error(err)
-      setError(err.message)
-    } finally {
-      setLoading(false)
-    }
-  }
+  const [employeeId, setEmployeeId] = useState(null);
+  const [attendance, setAttendance] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [actionLoading, setActionLoading] = useState(false);
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    loadAttendance()
-  }, [])
+    const loadAttendance = async () => {
+      try {
+        const storedEmployee = localStorage.getItem("employee");
 
-  // --------------------------------------------------
-  // GET RECORD FOR SELECTED DATE
-  // --------------------------------------------------
+        if (!storedEmployee) {
+          throw new Error("Please login first.");
+        }
 
-  const getRecordForDate = (employee) => {
-    const employeeId =
-      employee.id || employee.employee_id
+        const employee = JSON.parse(storedEmployee);
 
-    const records = attendance[employeeId] || []
+        const id =
+          employee.id ||
+          employee.employee_id ||
+          employee.employeeId;
 
-    return (
-      records.find(
-        (record) => record.date === selectedDate,
-      ) || null
-    )
-  }
+        if (!id) {
+          throw new Error("Employee ID is missing.");
+        }
 
-  // --------------------------------------------------
-  // FILTER
-  // --------------------------------------------------
+        setEmployeeId(id);
 
-  const filteredEmployees = useMemo(() => {
-    const searchValue = search.toLowerCase()
+        const response = await fetch(`/api/attendance/${id}`);
 
-    return employees.filter((employee) => {
-      const firstName =
-        employee.first_name || ''
+        if (!response.ok) {
+          throw new Error("Unable to load attendance history.");
+        }
 
-      const lastName =
-        employee.last_name || ''
+        const data = await response.json();
 
-      const fullName =
-        `${firstName} ${lastName}`.trim()
-
-      const employeeCode =
-        employee.employee_code ||
-        employee.id?.toString() ||
-        ''
-
-      const department =
-        employee.department || ''
-
-      return (
-        fullName
-          .toLowerCase()
-          .includes(searchValue) ||
-        employeeCode
-          .toLowerCase()
-          .includes(searchValue) ||
-        department
-          .toLowerCase()
-          .includes(searchValue)
-      )
-    })
-  }, [employees, search])
-
-  // --------------------------------------------------
-  // SUMMARY
-  // --------------------------------------------------
-
-  const summary = {
-    present: 0,
-    absent: 0,
-    leave: 0,
-    late: 0,
-  }
-
-  filteredEmployees.forEach((employee) => {
-    const record = getRecordForDate(employee)
-
-    if (!record) {
-      summary.absent += 1
-      return
-    }
-
-    if (record.status === 'present') {
-      summary.present += 1
-    } else if (record.status === 'leave') {
-      summary.leave += 1
-    } else if (record.status === 'half-day') {
-      summary.late += 1
-    } else {
-      summary.absent += 1
-    }
-  })
-
-  // --------------------------------------------------
-  // CHECK IN
-  // --------------------------------------------------
-
-  const handleCheckIn = async (employee) => {
-    try {
-      setActionLoading(employee.id)
-      setError('')
-
-      const token = localStorage.getItem('token')
-
-      if (!token) {
-        throw new Error('You are not logged in.')
+        setAttendance(Array.isArray(data) ? data : data.attendance || []);
+      } catch (err) {
+        setError(err.message || "Unable to load attendance.");
+      } finally {
+        setLoading(false);
       }
+    };
 
-      const response = await fetch(
-        `${API_URL}/api/attendance/check-in`,
-        {
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
+    loadAttendance();
+  }, []);
+
+  const handleAttendanceAction = async (action) => {
+    setActionLoading(true);
+    setMessage("");
+    setError("");
+
+    try {
+      const response = await fetch(`/api/attendance/${action}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
-      )
+        body: JSON.stringify({
+          employee_id: employeeId,
+        }),
+      });
 
-      const data = await response.json()
+      const data = await response.json();
 
       if (!response.ok) {
         throw new Error(
-          data.error || 'Check-in failed',
-        )
+          data.message || `Unable to ${action.replace("-", " ")}.`
+        );
       }
 
-      await loadAttendance()
+      setMessage(
+        data.message ||
+          `Successfully completed ${action.replace("-", " ")}.`
+      );
+
+      // Refresh attendance history
+      const historyResponse = await fetch(
+        `/api/attendance/${employeeId}`
+      );
+
+      if (historyResponse.ok) {
+        const historyData = await historyResponse.json();
+
+        setAttendance(
+          Array.isArray(historyData)
+            ? historyData
+            : historyData.attendance || []
+        );
+      }
     } catch (err) {
-      console.error(err)
-      setError(err.message)
+      setError(err.message || "Something went wrong.");
     } finally {
-      setActionLoading(null)
+      setActionLoading(false);
     }
-  }
+  };
 
-  // --------------------------------------------------
-  // CHECK OUT
-  // --------------------------------------------------
-
-  const handleCheckOut = async (employee) => {
-    try {
-      setActionLoading(employee.id)
-      setError('')
-
-      const token = localStorage.getItem('token')
-
-      if (!token) {
-        throw new Error('You are not logged in.')
-      }
-
-      const response = await fetch(
-        `${API_URL}/api/attendance/check-out`,
-        {
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-        },
-      )
-
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(
-          data.error || 'Check-out failed',
-        )
-      }
-
-      await loadAttendance()
-    } catch (err) {
-      console.error(err)
-      setError(err.message)
-    } finally {
-      setActionLoading(null)
-    }
-  }
-
-  // --------------------------------------------------
-  // STATUS STYLE
-  // --------------------------------------------------
-
-  const getStatusClass = (status) => {
-    if (status === 'present') {
-      return 'bg-green-100 text-green-700'
-    }
-
+<<<<<<< HEAD
+  if (loading) {
+    return <p>Loading attendance...</p>;
+=======
     if (status === 'half-day') {
       return 'bg-orange-100 text-orange-700'
     }
@@ -359,6 +112,7 @@ function Attendance() {
     }
 
     return 'bg-red-100 text-red-700'
+>>>>>>> origin/main
   }
 
   const getStatusText = (status) => {
@@ -382,6 +136,86 @@ function Attendance() {
   // --------------------------------------------------
 
   return (
+<<<<<<< HEAD
+    <div>
+      <div className="dashboard-heading">
+        <h1>Attendance</h1>
+        <p>Manage your daily attendance.</p>
+      </div>
+
+      {message && <div className="success-box">{message}</div>}
+
+      {error && <div className="error-box">{error}</div>}
+
+      <div className="attendance-actions">
+        <button
+          className="attendance-button"
+          disabled={actionLoading}
+          onClick={() => handleAttendanceAction("check-in")}
+        >
+          {actionLoading ? "Processing..." : "Check In"}
+        </button>
+
+        <button
+          className="attendance-button checkout"
+          disabled={actionLoading}
+          onClick={() => handleAttendanceAction("check-out")}
+        >
+          {actionLoading ? "Processing..." : "Check Out"}
+        </button>
+      </div>
+
+      <div className="attendance-section">
+        <h2>Attendance History</h2>
+
+        {attendance.length === 0 ? (
+          <div className="empty-box">
+            No attendance records found.
+          </div>
+        ) : (
+          <div className="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Check In</th>
+                  <th>Check Out</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {attendance.map((record, index) => (
+                  <tr key={record.id || index}>
+                    <td>
+                      {record.date ||
+                        record.attendance_date ||
+                        "-"}
+                    </td>
+
+                    <td>
+                      {record.check_in ||
+                        record.check_in_time ||
+                        "-"}
+                    </td>
+
+                    <td>
+                      {record.check_out ||
+                        record.check_out_time ||
+                        "-"}
+                    </td>
+
+                    <td>
+                      {record.status || "Present"}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+=======
     <div className="dashboard">
 
       <div className="dashboard-header">
@@ -732,8 +566,9 @@ function Attendance() {
 
       </Card>
 
+>>>>>>> origin/main
     </div>
-  )
+  );
 }
 
-export default Attendance
+export default Attendance;

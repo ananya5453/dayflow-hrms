@@ -1,98 +1,38 @@
-import { useState } from 'react'
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
-import Dashboard from './pages/Dashboard'
-import Employees from './pages/Employees'
-import Attendance from './pages/Attendance'
-import Leave from './pages/Leave'
-import Payroll from './pages/Payroll'
-import Performance from './pages/Performance'
-import Login from './pages/Login'
-
-import './App.css'
+import Login from "./pages/Login";
+import Dashboard from "./pages/Dashboard";
+import Profile from "./pages/Profile";
+import Attendance from "./pages/Attendance";
+import Leave from "./pages/Leave";
+import Payroll from "./pages/Payroll";
+import EmployeeLayout from "./layouts/EmployeeLayout";
 
 function App() {
-  const [user, setUser] = useState(() => {
-    const savedUser = localStorage.getItem('user')
-    return savedUser ? JSON.parse(savedUser) : null
-  })
-
-  const [activePage, setActivePage] = useState('Dashboard')
-
-  // If user is not logged in, show Login page
-  if (!user) {
-    return (
-      <Login
-        onLogin={(data) => {
-          setUser(data.user)
-          setActivePage('Dashboard')
-        }}
-      />
-    )
-  }
-
-  const navigation = [
-    { name: 'Dashboard', icon: '⌂' },
-    { name: 'Employees', icon: '♙' },
-    { name: 'Attendance', icon: '◷' },
-    { name: 'Leave', icon: '▣' },
-    { name: 'Payroll', icon: '₹' },
-    { name: 'Performance', icon: '↗' },
-  ]
-
-  const handleLogout = () => {
-    localStorage.removeItem('token')
-    localStorage.removeItem('user')
-    localStorage.removeItem('employee')
-
-    setUser(null)
-  }
-
-  const renderPage = () => {
-    switch (activePage) {
-      case 'Dashboard':
-        return <Dashboard />
-
-      case 'Employees':
-        return <Employees />
-
-      case 'Attendance':
-        return <Attendance />
-
-      case 'Leave':
-        return <Leave />
-
-      case 'Payroll':
-        return <Payroll />
-
-      case 'Performance':
-        return <Performance />
-
-      default:
-        return (
-          <div className="coming-soon">
-            <span className="coming-soon-icon">
-              🚧
-            </span>
-
-            <h2>{activePage}</h2>
-
-            <p>
-              This module will be implemented next.
-            </p>
-          </div>
-        )
-    }
-  }
-
   return (
-    <div className="app">
+    <BrowserRouter>
+      <Routes>
 
-      {/* SIDEBAR */}
+        <Route path="/login" element={<Login />} />
 
-      <aside className="sidebar">
+        <Route element={<EmployeeLayout />}>
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/attendance" element={<Attendance />} />
+          <Route path="/leave" element={<Leave />} />
+          <Route path="/payroll" element={<Payroll />} />
+        </Route>
 
-        <div className="brand">
+        <Route
+          path="*"
+          element={<Navigate to="/login" replace />}
+        />
 
+<<<<<<< HEAD
+      </Routes>
+    </BrowserRouter>
+  );
+=======
           <div className="brand-mark">
             D
           </div>
@@ -252,6 +192,7 @@ function App() {
 
     </div>
   )
+>>>>>>> origin/main
 }
 
-export default App
+export default App;
