@@ -6,6 +6,7 @@ import Employees from './pages/Employees'
 import Attendance from './pages/Attendance'
 import Leave from './pages/Leave'
 import Payroll from './pages/Payroll'
+import Performance from './pages/Performance'
 
 import './App.css'
 
@@ -19,14 +20,6 @@ function App() {
     { name: 'Leave', icon: '▣' },
     { name: 'Payroll', icon: '₹' },
     { name: 'Performance', icon: '↗' },
-  ]
-
-  const implementedPages = [
-    'Dashboard',
-    'Employees',
-    'Attendance',
-    'Leave',
-    'Payroll',
   ]
 
   const renderPage = () => {
@@ -46,10 +39,15 @@ function App() {
       case 'Payroll':
         return <Payroll />
 
+      case 'Performance':
+        return <Performance />
+
       default:
         return (
           <div className="coming-soon">
-            <span className="coming-soon-icon">🚧</span>
+            <span className="coming-soon-icon">
+              🚧
+            </span>
 
             <h2>{activePage}</h2>
 
@@ -64,13 +62,12 @@ function App() {
   return (
     <div className="app">
 
-      {/* ================= SIDEBAR ================= */}
+      {/* SIDEBAR */}
 
       <aside className="sidebar">
 
-        {/* BRAND */}
-
         <div className="brand">
+
           <div className="brand-mark">
             D
           </div>
@@ -82,9 +79,8 @@ function App() {
               HR Management
             </span>
           </div>
-        </div>
 
-        {/* NAVIGATION */}
+        </div>
 
         <nav className="navigation">
 
@@ -105,6 +101,7 @@ function App() {
                 setActivePage(item.name)
               }
             >
+
               <span className="nav-icon">
                 {item.icon}
               </span>
@@ -112,12 +109,11 @@ function App() {
               <span>
                 {item.name}
               </span>
+
             </button>
           ))}
 
         </nav>
-
-        {/* SIDEBAR BOTTOM */}
 
         <div className="sidebar-bottom">
 
@@ -132,6 +128,7 @@ function App() {
               setActivePage('Settings')
             }
           >
+
             <span className="nav-icon">
               ⚙
             </span>
@@ -139,9 +136,8 @@ function App() {
             <span>
               Settings
             </span>
-          </button>
 
-          {/* USER */}
+          </button>
 
           <div className="user-card">
 
@@ -167,15 +163,11 @@ function App() {
 
       </aside>
 
-      {/* ================= MAIN CONTENT ================= */}
+      {/* MAIN */}
 
       <main className="main-content">
 
-        {/* TOPBAR */}
-
         <header className="topbar">
-
-          {/* BREADCRUMB */}
 
           <div className="breadcrumb">
 
@@ -193,11 +185,7 @@ function App() {
 
           </div>
 
-          {/* TOPBAR ACTIONS */}
-
           <div className="topbar-actions">
-
-            {/* SEARCH */}
 
             <button
               type="button"
@@ -206,8 +194,6 @@ function App() {
             >
               ⌕
             </button>
-
-            {/* NOTIFICATIONS */}
 
             <button
               type="button"
@@ -218,8 +204,6 @@ function App() {
 
               <span className="notification-dot" />
             </button>
-
-            {/* PROFILE */}
 
             <button
               type="button"
@@ -251,12 +235,8 @@ function App() {
 
         </header>
 
-        {/* ================= PAGE CONTENT ================= */}
-
         <section className="content">
-
           {renderPage()}
-
         </section>
 
       </main>
