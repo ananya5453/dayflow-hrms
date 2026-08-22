@@ -3,6 +3,7 @@ import { useState } from 'react'
 import Dashboard from './pages/Dashboard'
 import Employees from './pages/Employees'
 import Attendance from './pages/Attendance'
+import Leave from './pages/Leave'
 import './App.css'
 
 function App() {
@@ -19,7 +20,6 @@ function App() {
 
   return (
     <div className="app">
-      {/* SIDEBAR */}
       <aside className="sidebar">
         <div className="brand">
           <div className="brand-mark">D</div>
@@ -65,9 +65,7 @@ function App() {
         </div>
       </aside>
 
-      {/* MAIN CONTENT */}
       <main className="main-content">
-        {/* TOP BAR */}
         <header className="topbar">
           <div className="breadcrumb">
             <span>DayFlow</span>
@@ -104,7 +102,6 @@ function App() {
           </div>
         </header>
 
-        {/* PAGE CONTENT */}
         <section className="content">
           {activePage === 'Dashboard' && <Dashboard />}
 
@@ -112,10 +109,13 @@ function App() {
 
           {activePage === 'Attendance' && <Attendance />}
 
+          {activePage === 'Leave' && <Leave />}
+
           {![
             'Dashboard',
             'Employees',
             'Attendance',
+            'Leave',
           ].includes(activePage) && (
             <div className="coming-soon">
               <span className="coming-soon-icon">🚧</span>
