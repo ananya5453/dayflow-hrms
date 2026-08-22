@@ -1,4 +1,3 @@
-
 import { useState } from 'react'
 
 import Dashboard from './pages/Dashboard'
@@ -7,11 +6,29 @@ import Attendance from './pages/Attendance'
 import Leave from './pages/Leave'
 import Payroll from './pages/Payroll'
 import Performance from './pages/Performance'
+import Login from './pages/Login'
 
 import './App.css'
 
 function App() {
+  const [user, setUser] = useState(() => {
+    const savedUser = localStorage.getItem('user')
+    return savedUser ? JSON.parse(savedUser) : null
+  })
+
   const [activePage, setActivePage] = useState('Dashboard')
+
+  // If user is not logged in, show Login page
+  if (!user) {
+    return (
+      <Login
+        onLogin={(data) => {
+          setUser(data.user)
+          setActivePage('Dashboard')
+        }}
+      />
+    )
+  }
 
   const navigation = [
     { name: 'Dashboard', icon: '⌂' },
@@ -21,6 +38,14 @@ function App() {
     { name: 'Payroll', icon: '₹' },
     { name: 'Performance', icon: '↗' },
   ]
+
+  const handleLogout = () => {
+    localStorage.removeItem('token')
+    localStorage.removeItem('user')
+    localStorage.removeItem('employee')
+
+    setUser(null)
+  }
 
   const renderPage = () => {
     switch (activePage) {
@@ -101,7 +126,6 @@ function App() {
                 setActivePage(item.name)
               }
             >
-
               <span className="nav-icon">
                 {item.icon}
               </span>
@@ -109,7 +133,6 @@ function App() {
               <span>
                 {item.name}
               </span>
-
             </button>
           ))}
 
@@ -119,40 +142,32 @@ function App() {
 
           <button
             type="button"
-            className={`nav-item ${
-              activePage === 'Settings'
-                ? 'active'
-                : ''
-            }`}
-            onClick={() =>
-              setActivePage('Settings')
-            }
+            className="nav-item"
+            onClick={handleLogout}
           >
-
             <span className="nav-icon">
-              ⚙
+              ↪
             </span>
 
             <span>
-              Settings
+              Logout
             </span>
-
           </button>
 
           <div className="user-card">
 
             <div className="avatar">
-              J
+              {user?.email?.charAt(0).toUpperCase() || 'J'}
             </div>
 
             <div className="user-details">
 
               <strong>
-                Jeeval
+                {user?.email || 'User'}
               </strong>
 
               <span>
-                Administrator
+                {user?.role || 'Employee'}
               </span>
 
             </div>
@@ -201,34 +216,28 @@ function App() {
               title="Notifications"
             >
               ♧
-
               <span className="notification-dot" />
             </button>
 
             <button
               type="button"
               className="profile"
-              onClick={() =>
-                setActivePage('Settings')
-              }
             >
-
               <div className="avatar small">
-                J
+                {user?.email?.charAt(0).toUpperCase() || 'J'}
               </div>
 
               <div className="profile-details">
 
                 <strong>
-                  Jeeval
+                  {user?.email || 'User'}
                 </strong>
 
                 <span>
-                  Admin
+                  {user?.role || 'Employee'}
                 </span>
 
               </div>
-
             </button>
 
           </div>
