@@ -1,121 +1,112 @@
+
 import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
+import Dashboard from './pages/Dashboard'
+import Employees from './pages/Employees'
 import './App.css'
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [activePage, setActivePage] = useState('Dashboard')
+
+  const navigation = [
+    { name: 'Dashboard', icon: '⌂' },
+    { name: 'Employees', icon: '♙' },
+    { name: 'Attendance', icon: '◷' },
+    { name: 'Leave', icon: '▣' },
+    { name: 'Payroll', icon: '₹' },
+    { name: 'Performance', icon: '↗' },
+  ]
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+    <div className="app">
+      <aside className="sidebar">
+        <div className="brand">
+          <div className="brand-mark">D</div>
 
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
+          <div>
+            <h2>DayFlow</h2>
+            <span>HR Management</span>
+          </div>
         </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
+        <nav className="navigation">
+          <span className="nav-label">WORKSPACE</span>
+
+          {navigation.map((item) => (
+            <button
+              key={item.name}
+              className={`nav-item ${
+                activePage === item.name ? 'active' : ''
+              }`}
+              onClick={() => setActivePage(item.name)}
+            >
+              <span className="nav-icon">{item.icon}</span>
+              {item.name}
+            </button>
+          ))}
+        </nav>
+
+        <div className="sidebar-bottom">
+          <button className="nav-item">
+            <span className="nav-icon">⚙</span>
+            Settings
+          </button>
+
+          <div className="user-card">
+            <div className="avatar">J</div>
+
+            <div>
+              <strong>Jeeval</strong>
+              <span>Administrator</span>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <main className="main-content">
+        <header className="topbar">
+          <div className="breadcrumb">
+            DayFlow <span>/</span> {activePage}
+          </div>
+
+          <div className="topbar-actions">
+            <button className="icon-button" type="button">
+              ⌕
+            </button>
+
+            <button
+              className="icon-button notification"
+              type="button"
+            >
+              ♧
+              <span />
+            </button>
+
+            <div className="profile">
+              <div className="avatar small">J</div>
+
+              <div>
+                <strong>Jeeval</strong>
+                <span>Admin</span>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        <section className="content">
+          {activePage === 'Dashboard' && <Dashboard />}
+
+          {activePage === 'Employees' && <Employees />}
+
+          {!['Dashboard', 'Employees'].includes(activePage) && (
+            <div className="coming-soon">
+              <span>🚧</span>
+              <h2>{activePage}</h2>
+              <p>This module will be implemented next.</p>
+            </div>
+          )}
+        </section>
+      </main>
+    </div>
   )
 }
 
