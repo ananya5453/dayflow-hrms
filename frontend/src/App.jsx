@@ -1,9 +1,12 @@
 
 import { useState } from 'react'
+
 import Dashboard from './pages/Dashboard'
 import Employees from './pages/Employees'
 import Attendance from './pages/Attendance'
 import Leave from './pages/Leave'
+import Payroll from './pages/Payroll'
+
 import './App.css'
 
 function App() {
@@ -18,117 +21,246 @@ function App() {
     { name: 'Performance', icon: '↗' },
   ]
 
+  const implementedPages = [
+    'Dashboard',
+    'Employees',
+    'Attendance',
+    'Leave',
+    'Payroll',
+  ]
+
+  const renderPage = () => {
+    switch (activePage) {
+      case 'Dashboard':
+        return <Dashboard />
+
+      case 'Employees':
+        return <Employees />
+
+      case 'Attendance':
+        return <Attendance />
+
+      case 'Leave':
+        return <Leave />
+
+      case 'Payroll':
+        return <Payroll />
+
+      default:
+        return (
+          <div className="coming-soon">
+            <span className="coming-soon-icon">🚧</span>
+
+            <h2>{activePage}</h2>
+
+            <p>
+              This module will be implemented next.
+            </p>
+          </div>
+        )
+    }
+  }
+
   return (
     <div className="app">
-      <aside className="sidebar">
-        <div className="brand">
-          <div className="brand-mark">D</div>
 
-          <div>
+      {/* ================= SIDEBAR ================= */}
+
+      <aside className="sidebar">
+
+        {/* BRAND */}
+
+        <div className="brand">
+          <div className="brand-mark">
+            D
+          </div>
+
+          <div className="brand-text">
             <h2>DayFlow</h2>
-            <span>HR Management</span>
+
+            <span>
+              HR Management
+            </span>
           </div>
         </div>
 
+        {/* NAVIGATION */}
+
         <nav className="navigation">
-          <span className="nav-label">WORKSPACE</span>
+
+          <span className="nav-label">
+            WORKSPACE
+          </span>
 
           {navigation.map((item) => (
             <button
               key={item.name}
               type="button"
               className={`nav-item ${
-                activePage === item.name ? 'active' : ''
+                activePage === item.name
+                  ? 'active'
+                  : ''
               }`}
-              onClick={() => setActivePage(item.name)}
+              onClick={() =>
+                setActivePage(item.name)
+              }
             >
-              <span className="nav-icon">{item.icon}</span>
-              <span>{item.name}</span>
+              <span className="nav-icon">
+                {item.icon}
+              </span>
+
+              <span>
+                {item.name}
+              </span>
             </button>
           ))}
+
         </nav>
 
+        {/* SIDEBAR BOTTOM */}
+
         <div className="sidebar-bottom">
-          <button type="button" className="nav-item">
-            <span className="nav-icon">⚙</span>
-            <span>Settings</span>
+
+          <button
+            type="button"
+            className={`nav-item ${
+              activePage === 'Settings'
+                ? 'active'
+                : ''
+            }`}
+            onClick={() =>
+              setActivePage('Settings')
+            }
+          >
+            <span className="nav-icon">
+              ⚙
+            </span>
+
+            <span>
+              Settings
+            </span>
           </button>
 
-          <div className="user-card">
-            <div className="avatar">J</div>
+          {/* USER */}
 
-            <div>
-              <strong>Jeeval</strong>
-              <span>Administrator</span>
+          <div className="user-card">
+
+            <div className="avatar">
+              J
             </div>
+
+            <div className="user-details">
+
+              <strong>
+                Jeeval
+              </strong>
+
+              <span>
+                Administrator
+              </span>
+
+            </div>
+
           </div>
+
         </div>
+
       </aside>
 
+      {/* ================= MAIN CONTENT ================= */}
+
       <main className="main-content">
+
+        {/* TOPBAR */}
+
         <header className="topbar">
+
+          {/* BREADCRUMB */}
+
           <div className="breadcrumb">
-            <span>DayFlow</span>
-            <span>/</span>
-            <strong>{activePage}</strong>
+
+            <span>
+              DayFlow
+            </span>
+
+            <span className="breadcrumb-separator">
+              /
+            </span>
+
+            <span className="breadcrumb-current">
+              {activePage}
+            </span>
+
           </div>
 
+          {/* TOPBAR ACTIONS */}
+
           <div className="topbar-actions">
+
+            {/* SEARCH */}
+
             <button
-              className="icon-button"
               type="button"
-              aria-label="Search"
+              className="icon-button"
+              title="Search"
             >
               ⌕
             </button>
 
+            {/* NOTIFICATIONS */}
+
             <button
-              className="icon-button notification"
               type="button"
-              aria-label="Notifications"
+              className="icon-button notification"
+              title="Notifications"
             >
               ♧
-              <span />
+
+              <span className="notification-dot" />
             </button>
 
-            <div className="profile">
-              <div className="avatar small">J</div>
+            {/* PROFILE */}
 
-              <div>
-                <strong>Jeeval</strong>
-                <span>Admin</span>
+            <button
+              type="button"
+              className="profile"
+              onClick={() =>
+                setActivePage('Settings')
+              }
+            >
+
+              <div className="avatar small">
+                J
               </div>
-            </div>
+
+              <div className="profile-details">
+
+                <strong>
+                  Jeeval
+                </strong>
+
+                <span>
+                  Admin
+                </span>
+
+              </div>
+
+            </button>
+
           </div>
+
         </header>
 
+        {/* ================= PAGE CONTENT ================= */}
+
         <section className="content">
-          {activePage === 'Dashboard' && <Dashboard />}
 
-          {activePage === 'Employees' && <Employees />}
+          {renderPage()}
 
-          {activePage === 'Attendance' && <Attendance />}
-
-          {activePage === 'Leave' && <Leave />}
-
-          {![
-            'Dashboard',
-            'Employees',
-            'Attendance',
-            'Leave',
-          ].includes(activePage) && (
-            <div className="coming-soon">
-              <span className="coming-soon-icon">🚧</span>
-
-              <h2>{activePage}</h2>
-
-              <p>
-                This module is planned and will be implemented next.
-              </p>
-            </div>
-          )}
         </section>
+
       </main>
+
     </div>
   )
 }
