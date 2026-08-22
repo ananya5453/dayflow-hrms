@@ -2,6 +2,7 @@
 import { useState } from 'react'
 import Dashboard from './pages/Dashboard'
 import Employees from './pages/Employees'
+import Attendance from './pages/Attendance'
 import './App.css'
 
 function App() {
@@ -18,6 +19,7 @@ function App() {
 
   return (
     <div className="app">
+      {/* SIDEBAR */}
       <aside className="sidebar">
         <div className="brand">
           <div className="brand-mark">D</div>
@@ -34,21 +36,22 @@ function App() {
           {navigation.map((item) => (
             <button
               key={item.name}
+              type="button"
               className={`nav-item ${
                 activePage === item.name ? 'active' : ''
               }`}
               onClick={() => setActivePage(item.name)}
             >
               <span className="nav-icon">{item.icon}</span>
-              {item.name}
+              <span>{item.name}</span>
             </button>
           ))}
         </nav>
 
         <div className="sidebar-bottom">
-          <button className="nav-item">
+          <button type="button" className="nav-item">
             <span className="nav-icon">⚙</span>
-            Settings
+            <span>Settings</span>
           </button>
 
           <div className="user-card">
@@ -62,20 +65,29 @@ function App() {
         </div>
       </aside>
 
+      {/* MAIN CONTENT */}
       <main className="main-content">
+        {/* TOP BAR */}
         <header className="topbar">
           <div className="breadcrumb">
-            DayFlow <span>/</span> {activePage}
+            <span>DayFlow</span>
+            <span>/</span>
+            <strong>{activePage}</strong>
           </div>
 
           <div className="topbar-actions">
-            <button className="icon-button" type="button">
+            <button
+              className="icon-button"
+              type="button"
+              aria-label="Search"
+            >
               ⌕
             </button>
 
             <button
               className="icon-button notification"
               type="button"
+              aria-label="Notifications"
             >
               ♧
               <span />
@@ -92,16 +104,27 @@ function App() {
           </div>
         </header>
 
+        {/* PAGE CONTENT */}
         <section className="content">
           {activePage === 'Dashboard' && <Dashboard />}
 
           {activePage === 'Employees' && <Employees />}
 
-          {!['Dashboard', 'Employees'].includes(activePage) && (
+          {activePage === 'Attendance' && <Attendance />}
+
+          {![
+            'Dashboard',
+            'Employees',
+            'Attendance',
+          ].includes(activePage) && (
             <div className="coming-soon">
-              <span>🚧</span>
+              <span className="coming-soon-icon">🚧</span>
+
               <h2>{activePage}</h2>
-              <p>This module will be implemented next.</p>
+
+              <p>
+                This module is planned and will be implemented next.
+              </p>
             </div>
           )}
         </section>
